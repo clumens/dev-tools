@@ -15,7 +15,8 @@ get the mangled data on stdout.  This assumes a couple things:
   name\_of\_function\_test.c.
 
 Make sure the script is in your $PATH, apply the following patch to the pacemaker
-source tree, and `make coverage` will do the right thing.
+source tree, then run `./configure --with-coverage` and `make coverage` will
+do the right thing.
 
 ```diff
 diff --git a/devel/Makefile.am b/devel/Makefile.am
