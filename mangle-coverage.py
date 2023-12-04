@@ -35,6 +35,14 @@ def is_static_fn(lst, fn):
 
     return fn in lst
 
+def private_fn_with_tested_public(lst, fn):
+    """ Is this a private function (one that starts with "pcmk__") and if so,
+        is there a public version (one that starts with "pcmk_") in the list
+        of tested functions?
+    """
+
+    return fn.startswith("pcmk__") and fn.replace("pcmk__", "pcmk_", 1) in lst
+
 def tested_fns():
     """ Return a list of all functions which have a unit test.  Luckily, we
         give the test files a name that matches the function.
@@ -219,6 +227,12 @@ if __name__ == "__main__":
             # so leave its coverage alone.  Chances are, some public function
             # wraps it and tests it well enough.
             if is_static_fn(static, fr.name):
+                continue
+
+            # If this is a private function with a public version we have a test
+            # for, it's likely the private function does all the hard work and
+            # the public test does a good enough job testing it.
+            if private_fn_with_tested_public(tested, fr.name):
                 continue
 
             # The executed public function is not in the list of functions that
