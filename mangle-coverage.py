@@ -56,6 +56,18 @@ def tested_fns():
     for f in test_files:
         fns.append(f.name.removesuffix("_test.c"))
 
+    # Some functions have unit tests in a file that doesn't match their name.
+    # This commonly happens with things like case-sensitive vs. case-insensitive
+    # versions of string functions.
+    fns.extend(["crm_exit_name",
+                "crm_exit_str",
+                "pcmk__add_separated_word",
+                "pcmk__ends_with_ext",
+                "pcmk__strcase_any_of",
+                "pcmk_rc2exitc",
+                "pcmk_rc_name",
+                "pcmk_rc_str"])
+
     return sorted(fns)
 
 def fns_in_record(record):
