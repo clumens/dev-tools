@@ -1,0 +1,39 @@
+diff --git a/.gitignore b/.gitignore
+index 69f24d2ba..0c97027cf 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -230,6 +230,7 @@ TAGS
+ /doc/sphinx/shared/images/*.png
+ 
+ # Test artifacts (from unit tests, regression tests, static analysis, etc.)
++*.ci
+ *.coverity
+ *.gcda
+ *.gcno
+diff --git a/configure.ac b/configure.ac
+index b21361fd9..ac05fb727 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1839,6 +1839,7 @@ dnl otherwise none of both
+     EXTRA_FLAGS="$EXTRA_FLAGS -Wwrite-strings"
+     EXTRA_FLAGS="$EXTRA_FLAGS -Wunused-but-set-variable"
+     EXTRA_FLAGS="$EXTRA_FLAGS -Wunsigned-char"
++    EXTRA_FLAGS="$EXTRA_FLAGS -fcallgraph-info"
+ 
+     AS_IF([test x"$gcc_diagnostic_push_pull" = x"yes"],
+           [
+diff --git a/devel/Makefile.am b/devel/Makefile.am
+index 15012f6f8..c59f57cc2 100644
+--- a/devel/Makefile.am
++++ b/devel/Makefile.am
+@@ -214,7 +214,9 @@ coverage: coverage-partial-clean
+ 		"$(abs_top_builddir)/tools/*"				\
+ 		"$(abs_top_builddir)/daemons/*/*"			\
+ 		"$(abs_top_builddir)/replace/*"				\
+-		"$(abs_top_builddir)/lib/gnu/*"
++		"$(abs_top_builddir)/lib/gnu/*"                         \
++	&& mangle-coverage.py pacemaker_filtered.info > mangled_output.info     \
++	&& mv mangled_output.info pacemaker_filtered.info
+ 	genhtml $(top_builddir)/pacemaker_filtered.info -o $(COVERAGE_DIR) -s -t "Pacemaker code coverage"
+ 
+ # Check coverage of CLI regression tests
