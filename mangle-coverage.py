@@ -43,6 +43,17 @@ def private_fn_with_tested_public(lst, fn):
 
     return fn.startswith("pcmk__") and fn.replace("pcmk__", "pcmk_", 1) in lst
 
+def source_file(record):
+    """ Return the source file described by a given record """
+
+    for line in record:
+        if not line.startswith("SF:"):
+            continue
+
+        return line.removeprefix("SF:")
+
+    return None
+
 def tested_fns():
     """ Return a list of all functions which have a unit test.  Luckily, we
         give the test files a name that matches the function.
@@ -230,6 +241,8 @@ if __name__ == "__main__":
     records = recordize_info_file()
 
     for r in records:
+        file_name = source_file(r)
+
         for fr in fns_in_record(r):
             # If the function wasn't executed, there's nothing to do.
             if not fn_executed(r, fr.name):
