@@ -102,7 +102,7 @@ def fns_in_record(record):
 
     # Second pass - iterate over the tuples list and fix up the last lines.
     for i in range(0, len(tuples) - 1):
-        tuples[i] = tuples[i]._replace(end=tuples[i+1].start - 1)
+        tuples[i] = tuples[i]._replace(end=tuples[i + 1].start - 1)
 
     return tuples
 
