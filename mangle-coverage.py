@@ -228,6 +228,10 @@ def erase_function_from_record(record, fr):
 
     return new_lines
 
+def trouble_fns():
+    return ["ends_with", "pcmk__str_hash", "pcmk__strcase_equal", "pcmk__strcase_hash",
+            "copy_str_table_entry"]
+
 def nothing_calls_fn(callgraph, candidates, fn):
     retval = True
 
@@ -238,9 +242,7 @@ def nothing_calls_fn(callgraph, candidates, fn):
                 break
         except nx.NodeNotFound as e:
             # I don't know what's up with these, so just ignore them for now.
-            if c.name == "pcmk__starts_with" and fn in ["ends_with", "pcmk__str_hash", \
-                                                        "pcmk__strcase_equal", "pcmk__strcase_hash", \
-                                                        "copy_str_table_entry"]:
+            if c.name == "pcmk__starts_with" and fn in trouble_fns():
                 continue
 
             if c.name == "pe__cmp_rsc_priority" and fn == "resource_node_score":
@@ -374,7 +376,8 @@ if __name__ == "__main__":
     for r in records:
         file_name = remove_source_dir(source_file(r))
         fns = fns_in_record(r)
-        public_tested_fns = [f for f in fns if f.name in tested and not is_static_fn(static, f.name)]
+        public_tested_fns = [f for f in fns if f.name in tested
+                             and not is_static_fn(static, f.name)]
 
         cg = find_callgraph_file(callgraphs, file_name)
         if not cg:
