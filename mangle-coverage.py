@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""Mangle a coverage file to produce more accurate output."""
 
 # pylint: disable-msg=invalid-name
 # pylint: disable-msg=redefined-outer-name
@@ -16,16 +17,12 @@ FnRecord = namedtuple("FnRecord", ["name", "start", "end"])
 
 
 def is_fnda_line_for_fn(line, fn):
-    """ Is this a FNDA line describing a given function? """
-
+    """Return True if this is a FNDA line for the given function."""
     return line.startswith("FNDA:") and line.endswith(f",{fn}")
 
 
 def is_line_in_fn(line, start, end):
-    """ If this is a DA line, does the line number fall within the range
-        [start, end]?
-    """
-
+    """Return True if this is a DA line within the range [start, end]."""
     if not line.startswith("DA:"):
         return False
 
@@ -36,23 +33,17 @@ def is_line_in_fn(line, start, end):
 
 
 def is_static_fn(lst, fn):
-    """ Is the given function static? """
-
+    """Return True if the given function is static."""
     return fn in lst
 
 
 def private_fn_with_tested_public(lst, fn):
-    """ Is this a private function (one that starts with "pcmk__") and if so,
-        is there a public version (one that starts with "pcmk_") in the list
-        of tested functions?
-    """
-
+    """Return True if this is a private function with a tested public version."""
     return fn.startswith("pcmk__") and fn.replace("pcmk__", "pcmk_", 1) in lst
 
 
 def source_file(record):
-    """ Return the source file described by a given record """
-
+    """Return the source file described by a given record."""
     for line in record:
         if not line.startswith("SF:"):
             continue
@@ -63,10 +54,11 @@ def source_file(record):
 
 
 def tested_fns():
-    """ Return a list of all functions which have a unit test.  Luckily, we
-        give the test files a name that matches the function.
     """
+    Return a list of all functions which have a unit test.
 
+    Luckily, we give the test files a name that matches the function.
+    """
     fns = []
 
     p = Path(".")
@@ -91,10 +83,11 @@ def tested_fns():
 
 
 def fns_in_record(record):
-    """ Given a record, return a list of (function, first line, last line) tuples.
-        If the function is the last in the record, last line will be None.
     """
+    Given a record, return a list of (function, first line, last line) tuples.
 
+    If the function is the last in the record, last line will be None.
+    """
     tuples = []
 
     # First pass - generate a list where all the last lines are set to None.
@@ -115,10 +108,7 @@ def fns_in_record(record):
 
 
 def fn_executed(record, fn):
-    """ Given a record and a function name, return whether that function was
-        actually executed.
-    """
-
+    """Return True if the given function name was executed."""
     for line in record:
         if not is_fnda_line_for_fn(line, fn):
             continue
@@ -132,10 +122,11 @@ def fn_executed(record, fn):
 
 
 def recordize_info_file():
-    """ Split an lcov output file into a list of records.  A record is simply
-        a list of lines, nothing fancy.
     """
+    Split an lcov output file into a list of records.
 
+    A record is simply a list of lines, nothing fancy.
+    """
     records = []
 
     with open(sys.argv[1], encoding="utf-8") as lcov:
@@ -155,8 +146,7 @@ def recordize_info_file():
 
 
 def static_fns():
-    """ Return a list of all static functions """
-
+    """Return a list of all static functions."""
     # This is lame, lame, lame but I don't feel like writing the equivalent
     # in python.
 
@@ -204,8 +194,7 @@ def static_fns():
 
 
 def erase_function_from_record(record, fr):
-    """ Remove a function from the given coverage record """
-
+    """Remove a function from the given coverage record."""
     new_lines = []
     executed_lines = 0
 
@@ -241,11 +230,13 @@ def erase_function_from_record(record, fr):
 
 
 def trouble_fns():
+    """Return a list of functions that are called, but don't have entries."""
     return ["ends_with", "pcmk__str_hash", "pcmk__strcase_equal", "pcmk__strcase_hash",
             "copy_str_table_entry"]
 
 
 def nothing_calls_fn(callgraph, candidates, fn):
+    """Return True if the given function is never called."""
     retval = True
 
     for c in candidates:
@@ -267,16 +258,16 @@ def nothing_calls_fn(callgraph, candidates, fn):
 
 
 def render_record(record):
-    """ Convert a record into a string that can be printed out """
-
+    """Convert a record into a string that can be printed out."""
     return "\n".join(record + ["end_of_record"])
 
 
 def build_call_graph(file_name):
-    """ Build a directed graph from function to all functions that it calls.
-        Note that these graphs only cover calls within a single source file.
     """
+    Build a directed graph from function to all functions that it calls.
 
+    Note that these graphs only cover calls within a single source file.
+    """
     G = nx.DiGraph()
     regex = re.compile(r"sourcename: \"([^\"]+)\" targetname: \"([^\"]+)\"")
 
@@ -309,18 +300,21 @@ def build_call_graph(file_name):
 
 
 def remove_source_dir(s):
-    """ Strip the current working directory (expected to be $HOME/src/pacemaker)
-        from a string.
     """
+    Strip the current working directory from a string.
 
+    The CWD is expected to be $HOME/src/pacemaker.
+    """
     return s.removeprefix(os.getcwd() + "/")
 
 
 def callgraph_files():
-    """ Return a list of callgraph files generated by gcc (.ci files) as strings, with the
-        current source directory removed from the front of each
     """
+    Return a list of callgraph files generated by gcc (.ci files).
 
+    Each entry in the list is a string with the current source directory
+    removed from the front.
+    """
     lst = []
     p = Path(".")
 
@@ -347,10 +341,7 @@ def callgraph_files():
 
 
 def find_callgraph_file(callgraphs, file_name):
-    """ Given a list of callgraph files and a source filename, return the callgraph
-        file that matches or None if no callgraph is found.
-    """
-
+    """Return the callgraph file for the given filename, or None."""
     # file_name is something like "lib/services/systemd.c", but the callgraph names are
     # something like "lib/services/libcrmservice_la-services.ci".  The same source file
     # could also exist in multiple directories.
