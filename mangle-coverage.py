@@ -128,7 +128,7 @@ def recordize_info_file():
 
     records = []
 
-    with open(sys.argv[1]) as lcov:
+    with open(sys.argv[1], encoding="utf-8") as lcov:
         this_record = []
 
         for line in lcov:
@@ -262,7 +262,7 @@ def build_call_graph(file_name):
     G = nx.DiGraph()
     regex = re.compile(r"sourcename: \"([^\"]+)\" targetname: \"([^\"]+)\"")
 
-    with open(file_name) as f:
+    with open(file_name, encoding="utf-8") as f:
         for line in f:
             if not line.startswith("edge:"):
                 continue
