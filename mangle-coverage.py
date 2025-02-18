@@ -16,7 +16,7 @@ FnRecord = namedtuple("FnRecord", ["name", "start", "end"])
 def is_fnda_line_for_fn(line, fn):
     """ Is this a FNDA line describing a given function? """
 
-    return line.startswith("FNDA:") and line.endswith(",%s" % fn)
+    return line.startswith("FNDA:") and line.endswith(f",{fn}")
 
 def is_line_in_fn(line, start, end):
     """ If this is a DA line, does the line number fall within the range
@@ -200,18 +200,18 @@ def erase_function_from_record(record, fr):
     for line in record:
         # Reset the execution count for the function to 0.
         if is_fnda_line_for_fn(line, fr.name):
-            new_lines.append("FNDA:0,%s" % fr.name)
+            new_lines.append(f"FNDA:0,{fr.name}")
 
         # Remove the function from the total number of functions hit.
         elif line.startswith("FNH:"):
             (_, cnt) = line.split(":")
-            new_lines.append("FNH:%d" % (int(cnt) - 1))
+            new_lines.append(f"FNH:{int(cnt) - 1}")
 
         # Reset the exection count for each line in the function to 0.
         elif is_line_in_fn(line, fr.start, fr.end):
             line = line.removeprefix("DA:")
             (line_no, cnt) = line.split(",")
-            new_lines.append("DA:%s,0" % line_no)
+            new_lines.append(f"DA:{line_no},0")
 
             if cnt != "0":
                 executed_lines += 1
@@ -220,7 +220,7 @@ def erase_function_from_record(record, fr):
         # total.
         elif line.startswith("LH:"):
             (_, cnt) = line.split(":")
-            new_lines.append("LH:%d" % (int(cnt) - executed_lines))
+            new_lines.append(f"LH:{int(cnt) - executed_lines}")
 
         else:
             new_lines.append(line)
@@ -354,14 +354,14 @@ def find_callgraph_file(callgraphs, file_name):
 
         # If the callgraph file ends with the file (minus extension), we've
         # found a match
-        if cgFileName.endswith("-%s.ci" % fileBase):
+        if cgFileName.endswith(f"-{fileBase}.ci"):
             return f
 
     return None
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or not os.path.isfile(sys.argv[1]):
-        print("usage: %s <coverage_file.info>" % sys.argv[0])
+        print(f"usage: {sys.argv[0]} <coverage_file.info>")
         sys.exit()
 
     tested = tested_fns()
