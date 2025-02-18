@@ -4,12 +4,13 @@
 # pylint: disable-msg=redefined-outer-name
 
 from collections import namedtuple
-from pathlib import Path
-import networkx as nx
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
+
+import networkx as nx
 
 FnRecord = namedtuple("FnRecord", ["name", "start", "end"])
 
